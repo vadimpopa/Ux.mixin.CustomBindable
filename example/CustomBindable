@@ -1,0 +1,85 @@
+Ext.define('Fiddle.mixin.CustomBindable', {
+    extend: 'Ext.Mixin',
+    
+    mixinConfig: {
+        id: 'customBindable',
+        after: {
+            initComponent: 'initCustomBindable'
+        },
+        before: {
+            destroy: 'destroy'
+        }
+    },
+
+    config: {
+        customBindings: {
+            $value: [],
+            lazy: true
+        }
+    },
+
+    initCustomBindable: function () {
+        var me = this;
+        var bindings;
+
+        if (me.initCustomBindings) {
+            bindings = me.initCustomBindings();
+
+            Ext.apply(me.config, {
+                customBindings: bindings
+            });
+        }
+        
+        me.on({
+            scope: me,
+            activate: function () {
+                var me = this;
+                
+               	if (!me.customBindings) {
+                    me.getCustomBindings();
+                } else {
+					me.setCustomBindings(me.getInitialConfig('customBindings'));
+                }
+            },
+            deactivate: function () {
+                this.mixins.customBindable.disable.call(this);
+            }
+        });
+    },
+
+    applyCustomBindings: function (bindings) {
+        var i,ln;
+        var binding;
+        var bounds = [];
+        var vm = this.lookupViewModel();
+
+        for (i = 0, ln = bindings.length; i < ln; i++) {
+            binding = vm.bind(
+                bindings[i].bind,
+                bindings[i].get,
+                this,
+                {
+                    twoWay: false
+                }
+            );
+            
+            bounds.push(binding);
+        }
+
+        return bounds;
+    },
+
+    disable: function () {
+        var i,ln;
+        var bindings = this.getCustomBindings();
+
+        for (i = 0, ln = bindings.length; i < ln; i++) {
+            bindings[i].destroy();
+        }
+    },
+
+    destroy: function () {
+        this.mixins.customBindable.disable.call(this);
+        this.setCustomBindings([]);
+    }
+});
