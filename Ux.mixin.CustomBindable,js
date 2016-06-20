@@ -1,6 +1,6 @@
 Ext.define('Ux.mixin.CustomBindable', {
     extend: 'Ext.Mixin',
-    
+
     mixinConfig: {
         id: 'customBindable',
         after: {
@@ -21,6 +21,7 @@ Ext.define('Ux.mixin.CustomBindable', {
     initCustomBindable: function () {
         var me = this;
         var bindings;
+        var config;
 
         if (me.initCustomBindings) {
             bindings = me.initCustomBindings();
@@ -29,16 +30,16 @@ Ext.define('Ux.mixin.CustomBindable', {
                 customBindings: bindings
             });
         }
-        
+
         me.on({
             scope: me,
             activate: function () {
                 var me = this;
-                
-               	if (!me.customBindings) {
+
+                if (!me.customBindings) {
                     me.getCustomBindings();
                 } else {
-					me.setCustomBindings(me.getInitialConfig('customBindings'));
+                    me.setCustomBindings(me.getInitialConfig('customBindings'));
                 }
             },
             deactivate: function () {
@@ -62,7 +63,7 @@ Ext.define('Ux.mixin.CustomBindable', {
                     twoWay: false
                 }
             );
-            
+
             bounds.push(binding);
         }
 
@@ -79,7 +80,11 @@ Ext.define('Ux.mixin.CustomBindable', {
     },
 
     destroy: function () {
-        this.mixins.customBindable.disable.call(this);
-        this.setCustomBindings([]);
+        var me = this;
+
+        if (me.customBindings) {
+            me.mixins.customBindable.disable.call(me);
+            me.setCustomBindings([]);
+        }
     }
 });
