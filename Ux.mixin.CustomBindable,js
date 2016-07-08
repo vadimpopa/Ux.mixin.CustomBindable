@@ -38,8 +38,8 @@ Ext.define('Ux.mixin.CustomBindable', {
 
                 if (!me.customBindings) {
                     me.getCustomBindings();
-                } else {
-                    me.setCustomBindings(me.getInitialConfig('customBindings'));
+                } else {                    
+                    me.mixins.customBindable.enable.call(me);
                 }
             },
             deactivate: function () {
@@ -69,13 +69,31 @@ Ext.define('Ux.mixin.CustomBindable', {
 
         return bounds;
     },
+    
+    enable: function () {
+        var i,ln;
+        var bindings = this.getCustomBindings();
+        var scheduler;
+
+        for (i = 0, ln = bindings.length; i < ln; i++) { 
+            scheduler = bindings[i].getScheduler();
+            scheduler.add(bindings[i]);
+            bindings[i].schedule(); 
+        }
+        
+        if (scheduler) {
+            scheduler.notify();
+        }
+    },
 
     disable: function () {
         var i,ln;
         var bindings = this.getCustomBindings();
+        var scheduler;
 
         for (i = 0, ln = bindings.length; i < ln; i++) {
-            bindings[i].destroy();
+            scheduler = bindings[i].getScheduler();
+            scheduler.remove(bindings[i]);
         }
     },
 
@@ -88,3 +106,4 @@ Ext.define('Ux.mixin.CustomBindable', {
         }
     }
 });
+
